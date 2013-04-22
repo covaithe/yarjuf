@@ -30,6 +30,11 @@ class JUnit < RSpec::Core::Formatters::BaseFormatter
     output.puts @builder.target!
   end
 
+  def seed(number)
+    puts
+    puts "Randomized with seed #{number}"
+  end
+
   protected
 
   def add_to_test_suite_results(example)
