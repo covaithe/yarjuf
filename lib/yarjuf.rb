@@ -44,14 +44,14 @@ class JUnit < RSpec::Core::Formatters::BaseFormatter
   end
 
   def failure_details_for(example)
-    exception = example.metadata[:execution_result][:exception]
+    exception = example.metadata[:execution_result].exception
     exception.nil? ? "" : "#{exception.message}\n#{format_backtrace(exception.backtrace, example).join("\n")}"
   end
   
   #utility methods
 
   def self.count_in_suite_of_type(suite, test_case_result_type)
-    suite.select {|example| example.metadata[:execution_result][:status] == test_case_result_type}.size
+    suite.select {|example| example.metadata[:execution_result].status == test_case_result_type}.size
   end
 
   def self.root_group_name_for(example)
@@ -59,7 +59,7 @@ class JUnit < RSpec::Core::Formatters::BaseFormatter
     current_example_group = example.metadata[:example_group]
     until current_example_group.nil? do
       group_hierarchy.unshift current_example_group
-      current_example_group = current_example_group[:example_group]
+      current_example_group = current_example_group[:parent_example_group]
     end
     group_hierarchy.first[:description]
   end
@@ -97,11 +97,11 @@ class JUnit < RSpec::Core::Formatters::BaseFormatter
 
   def build_test(test)
     test_name = test.metadata[:full_description]
-    execution_time = test.metadata[:execution_result][:run_time]
-    test_status = test.metadata[:execution_result][:status]
+    execution_time = test.metadata[:execution_result].run_time
+    test_status = test.metadata[:execution_result].status
     
     @builder.testcase :name => test_name, :time => execution_time do
-      case test_status
+      case test_status.to_s
       when "pending" then @builder.skipped
       when "failed" then build_failed_test test
       end
